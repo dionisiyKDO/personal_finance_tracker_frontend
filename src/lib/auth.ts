@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 
 export const user = writable<User | null>(null);
 
-type User = {
+export interface User {
     username: string;
     token: string;
 }
