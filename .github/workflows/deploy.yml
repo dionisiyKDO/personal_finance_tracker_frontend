@@ -26,7 +26,7 @@ jobs:
       - name: Set up Git
         run: |
           git config --global user.email "135739796+dionisiyKDO@users.noreply.github.com"
-          git config --global user.name "Denys Kamiskyi"
+          git config --global user.name "Denys Kaminskyi"
 
       - name: Clone Django backend repository
         run: |
@@ -40,4 +40,4 @@ jobs:
           cd personal_finance_tracker_backend
           git add static/frontend
           git commit -m "Auto-update frontend build"
-          git push https://x-access-token:${GH_PAT}@github.com/dionisiyKDO/personal_finance_tracker_backend.git master
+          git push https://${GH_PAT}@github.com/dionisiyKDO/personal_finance_tracker_backend.git master
