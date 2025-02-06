@@ -26,7 +26,7 @@ jobs:
       - name: Set up Git
         run: |
           git config --global user.email "135739796+dionisiyKDO@users.noreply.github.com"
-          git config --global user.name "Denys Kaminskyi"
+          git config --global user.name "Denys Kamiskyi"
 
       - name: Clone Django backend repository
         run: |
