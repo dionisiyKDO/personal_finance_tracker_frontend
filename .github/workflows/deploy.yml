@@ -1,8 +1,8 @@
 name: Deploy Svelte to Django
 on:
-  push:  # Runs this action every time you push to the repo
+  push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
