@@ -39,4 +39,4 @@ jobs:
           cd personal_finance_tracker_backend
           git add static/frontend
           git commit -m "Auto-update frontend build"
-          git push origin main
+          git push origin master
