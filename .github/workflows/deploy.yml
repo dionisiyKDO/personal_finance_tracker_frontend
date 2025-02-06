@@ -1,0 +1,42 @@
+name: Deploy Svelte to Django
+on:
+  push:  # Runs this action every time you push to the repo
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout frontend repo (Svelte)
+        uses: actions/checkout@v4
+        
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Set up Git
+        run: |
+          git config --global user.email "135739796+dionisiyKDO@users.noreply.github.com"
+          git config --global user.name "Denys Kaminskyi"
+
+      - name: Clone Django backend repository
+        run: |
+          git clone https://github.com/dionisiyKDO/personal_finance_tracker_backend.git  # Clone backend repo
+          cp -r build/* personal_finance_tracker_backend/static/frontend/  # Copy built Svelte files to Django's static folder
+
+
+      - name: Push build to Django repo
+        run: |
+          cd personal_finance_tracker_backend
+          git add static/frontend
+          git commit -m "Auto-update frontend build"
+          git push origin main
