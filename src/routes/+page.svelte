@@ -110,7 +110,7 @@
             </div>
 
         {:else}
-            <div class="bg-[--surface] border border-yellow-200 text-yellow-700 p-4 rounded-lg">
+            <div class="bg-[--surface] border border-yellow-200 text-yellow-600 p-4 rounded-lg">
                 <p>No dashboard data available</p>
             </div>
         {/if}
