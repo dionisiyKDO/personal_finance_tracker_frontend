@@ -75,7 +75,10 @@ export async function fetchDashboardData(user: User | null): Promise<DashboardDa
     try {
         if (!user) { return null; } 
         
-        const response = await fetch('/api/dashboard-data/', {
+        const isStandalone = window.location.port !== '8000';
+        const apiBase = isStandalone ? 'http://localhost:8000' : '';
+        
+        const response = await fetch(`${apiBase}/api/dashboard-data/`, {
             method: 'GET',
             headers: { Authorization: `Token ${user.token}`, 'Content-Type': 'application/json' },
         });
