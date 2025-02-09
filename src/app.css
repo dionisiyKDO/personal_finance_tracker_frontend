@@ -21,6 +21,7 @@
 	/* Background Colors */
 	--background: #121212;
 	--surface: #1f1f1f;
+	--muted-surface: #232323;
 	--muted-background: #272727;
 	--input-background: #2a2a2a;
 
@@ -51,6 +52,12 @@
 
 @layer base {
 	a {
+		@apply text-[--primary] hover:text-[--primary-hover]
+		transition-all duration-100 ease-in-out
+		;
+	}
+
+	.inline-button {
 		@apply text-[--primary] hover:text-[--primary-hover]
 		transition-all duration-100 ease-in-out
 		;

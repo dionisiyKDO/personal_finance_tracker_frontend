@@ -19,6 +19,9 @@
     }).catch(err => {
         console.error('Dashboard data error:', err);
     });
+
+    let categoriesShowAll = false;
+    let vendorsShowAll = false;
 </script>
 
 <div class="p-4 container mx-auto">
@@ -68,34 +71,52 @@
             {#if dashboardData.data.expense_categories}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <!-- Expense Categories -->
-                    <div class="bg-[--surface] p-4 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold mb-4">Expense Categories</h3>
-                        <div class="space-y-3">
-                            {#each dashboardData.data.expense_categories as category}
-                                <div class="flex justify-between items-center">
-                                    <span class="capitalize">{category.category || 'Uncategorized'}</span>
-                                    <div class="text-right">
-                                        <div class="font-semibold">{formatCurrency(category.total)}</div>
-                                        <div class="text-sm text-gray-500">{category.count} transactions</div>
+                    <div class="bg-[--surface] py-4 rounded-lg shadow">
+                        <div class="flex justify-between items-center mb-4 px-4">
+                            <h3 class="text-lg font-semibold">Expense Categories</h3>
+                            {#if dashboardData.data.expense_categories.length > 5}
+                                <button class="inline-button" onclick={() => categoriesShowAll = !categoriesShowAll}>
+                                    {categoriesShowAll ? 'Show less' : 'Show all'}
+                                </button>
+                            {/if}
+                        </div>
+                        <div class="space-y-1">
+                            {#each dashboardData.data.expense_categories as category, index}
+                                {#if categoriesShowAll || index < 5}    
+                                    <div class="flex justify-between items-center even:bg-[--muted-surface] px-4 py-1">
+                                        <span class="capitalize">{category.category || 'Uncategorized'}</span>
+                                        <div class="text-right">
+                                            <div class="font-semibold">{formatCurrency(category.total)}</div>
+                                            <div class="text-sm text-gray-500">{category.count} transactions</div>
+                                        </div>
                                     </div>
-                                </div>
+                                {/if}
                             {/each}
                         </div>
                     </div>
 
                     <!-- Top Vendors -->
                     {#if dashboardData.data.top_vendors}
-                        <div class="bg-[--surface] p-4 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold mb-4">Top Vendors</h3>
-                            <div class="space-y-3">
-                                {#each dashboardData.data.top_vendors as vendor}
-                                    <div class="flex justify-between items-center">
-                                        <span class="w-2/3 text-nowrap overflow-x-hidden text-ellipsis">{vendor.vendor || 'Unknown'}</span>
-                                        <div class="text-right">
-                                            <div class="font-semibold">{formatCurrency(vendor.total_spent)}</div>
-                                            <div class="text-sm text-gray-500">{vendor.transaction_count} transactions</div>
+                        <div class="bg-[--surface] py-4 rounded-lg shadow">
+                            <div class="flex justify-between items-center mb-4 px-4">
+                                <h3 class="text-lg font-semibold">Top Vendors</h3>
+                                {#if dashboardData.data.top_vendors.length > 5}
+                                    <button class="inline-button" onclick={() => vendorsShowAll = !vendorsShowAll}>
+                                        {vendorsShowAll ? 'Show less' : 'Show all'}
+                                    </button>
+                                {/if}
+                            </div>
+                            <div class="space-y-1">
+                                {#each dashboardData.data.top_vendors as vendor, index}
+                                    {#if vendorsShowAll || index < 5}    
+                                        <div class="flex justify-between items-center even:bg-[--muted-surface] px-4 py-1">
+                                            <span class="w-2/3 text-nowrap overflow-x-hidden text-ellipsis">{vendor.vendor || 'Unknown'}</span>
+                                            <div class="text-right">
+                                                <div class="font-semibold">{formatCurrency(vendor.total_spent)}</div>
+                                                <div class="text-sm text-gray-500">{vendor.transaction_count} transactions</div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    {/if}
                                 {/each}
                             </div>
                         </div>
