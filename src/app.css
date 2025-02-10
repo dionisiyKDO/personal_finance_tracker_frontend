@@ -51,6 +51,10 @@
 }
 
 @layer base {
+    html {
+        scrollbar-gutter: stable; /* Add scroll space to the page*/
+    }
+	
 	a {
 		@apply text-[--primary] hover:text-[--primary-hover]
 		transition-all duration-100 ease-in-out

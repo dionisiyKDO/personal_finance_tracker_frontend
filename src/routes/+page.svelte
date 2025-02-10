@@ -24,6 +24,22 @@
     let vendorsShowAll = false;
 </script>
 
+<!-- 
+
+Бюджет
+стата по картам отдельно
+warning if vendor is not found in the mapping
+recategories category utils function
+recategories vendor utils function
+tie import scripts to user
+	make interface for scripts
+balance chart over time
+month(30d) stats, can also get basic stats for previos 30days, and show percentage difference
+Сделать страницу где чисто идёт таблица на всю страницу, с КРУД возможностями редактирования, подлучить ОРМ
+
+-->
+
+
 <div class="p-4 container mx-auto">
     <h1 class="text-3xl font-bold mb-6">Financial Dashboard</h1>
 

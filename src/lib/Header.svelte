@@ -2,9 +2,8 @@
     import { user, logout } from '$lib/auth';
 
     const links = [
-        { name: 'Link', href: '/' },
-        { name: 'Link', href: '/' },
-        { name: 'Link', href: '/' },
+        { name: 'Dashboard', href: '/' },
+        { name: 'DB', href: '/db/' },
     ];
 </script>
 
