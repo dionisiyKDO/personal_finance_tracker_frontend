@@ -43,8 +43,8 @@
 	--accent-hover: #f5a8e2;
 
 	/* Destructive Colors */
-	--destructive: #cf6679;
-	--destructive-hover: #b84d5f;
+	--destructive: #b84d5f;
+	--destructive-hover: #cf6679;
 
 	/* Border Colors */
 	--border: #333333;
@@ -64,6 +64,14 @@
 	.inline-button {
 		@apply text-[--primary] hover:text-[--primary-hover]
 		transition-all duration-100 ease-in-out
+		;
+	}
+
+	.button {
+		@apply text-[--primary] hover:text-[--primary-hover]
+		transition-all duration-100 ease-in-out
+		border-[--border] border-solid rounded-lg
+		px-4
 		;
 	}
 	
