@@ -1,7 +1,7 @@
 import { type User } from '$lib/auth';
 
 export interface Transaction {
-    id: number
+    id: number | null
     date: string
     type: string
     amount: string
@@ -47,3 +47,36 @@ export async function fetchTransactions(user: User | null): Promise<Transaction[
     }
 }
 
+export async function postEditTransaction(transaction: Transaction, user: User | null): Promise<Transaction | null> {
+    try {
+        if (!user) { return null; } 
+        
+        const isStandalone = window.location.port !== '8000';
+        const apiBase = isStandalone ? 'http://localhost:8000' : '';
+        
+        console.log('Transaction sent:', transaction);
+        
+        const response = await fetch(`${apiBase}/api/transactions/${transaction.id}/`, {
+            method: 'PUT',
+            headers: { Authorization: `Token ${user.token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(transaction)
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            const error = data.error || "Failed to edit transaction";
+            console.log(error);
+            return null;
+        }
+
+        console.log('response:', response);
+        console.log('response.json:', await response.json());
+        
+        const data = await response.json();
+        return data;
+        
+    } catch (error) {
+        console.error('Error during login:', error);
+        return null;
+    }
+}
