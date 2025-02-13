@@ -54,8 +54,6 @@ export async function postEditTransaction(transaction: Transaction, user: User |
         const isStandalone = window.location.port !== '8000';
         const apiBase = isStandalone ? 'http://localhost:8000' : '';
         
-        console.log('Transaction sent:', transaction);
-        
         const response = await fetch(`${apiBase}/api/transactions/${transaction.id}/`, {
             method: 'PUT',
             headers: { Authorization: `Token ${user.token}`, 'Content-Type': 'application/json' },
@@ -69,12 +67,35 @@ export async function postEditTransaction(transaction: Transaction, user: User |
             return null;
         }
 
-        console.log('response:', response);
-        const data = await response.json();
-        console.log('response.json:', data);
-        
+        const data = await response.json() as Transaction;
         return data;
+    } catch (error) {
+        console.error('Error during login:', error);
+        return null;
+    }
+}
+
+export async function postDeleteTransaction(transaction: Transaction, user: User | null): Promise<Boolean | null> {
+    try {
+        if (!user) { return null; } 
         
+        const isStandalone = window.location.port !== '8000';
+        const apiBase = isStandalone ? 'http://localhost:8000' : '';
+        
+        const response = await fetch(`${apiBase}/api/transactions/${transaction.id}/`, {
+            method: 'DELETE',
+            headers: { Authorization: `Token ${user.token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(transaction)
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            const error = data.error || "Failed to delete transaction";
+            console.log(error);
+            return null;
+        }
+        
+        return true;
     } catch (error) {
         console.error('Error during login:', error);
         return null;

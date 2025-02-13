@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { user } from '$lib/auth';
-	import { postEditTransaction, fetchTransactions, type Transaction } from './load';
+	import { postEditTransaction, postDeleteTransaction, fetchTransactions, type Transaction } from './load';
 
 	// #region Variables initialization
 	const transactionsReq: Promise<Transaction[] | null> = fetchTransactions($user);
 
 	let transactions = $state<Transaction[]>([]);
 	let editedTransaction = $state<Transaction>({} as Transaction);
-	
+
+	let showDeleteConfirm = $state<number | null>(null);
 	let isModalOpen = $state(false);
 	let sortField = $state('date');
 	let sortDirection = $state<'asc' | 'desc'>('desc');
@@ -24,12 +25,6 @@
 		'Education',
 		'Other'
 	];
-	// #endregion
-
-	// #region Transaction update/delete
-	function handleDelete(transaction: Transaction) {
-		console.log(transaction);
-	}
 	// #endregion
 
 	// #region Modal handling
@@ -53,7 +48,8 @@
 		const form = e.target as HTMLFormElement;
 		editedTransaction.date = form.date.value;
 		transactions = transactions.map((t) => (t.id === editedTransaction.id ? editedTransaction : t));
-		postEditTransaction(editedTransaction, $user);
+		let receivedTransaction = postEditTransaction(editedTransaction, $user);
+		// TODO: receive updated transaction
 		closeModal();
 	};
 	//  #endregion
@@ -67,8 +63,25 @@
 		return `${amount} ${currency}`;
 	};
 	// #endregion
+
+	// #region Delete handling
+	function handleDelete(transaction: Transaction) {
+		if (showDeleteConfirm === transaction.id) {
+			console.log('Deleting transaction:', transaction);
+			postDeleteTransaction(transaction, $user);
+			showDeleteConfirm = null;
+		} else {
+			showDeleteConfirm = transaction.id;
+		}
+	}
+
+	function cancelDelete() {
+		showDeleteConfirm = null;
+	}
+	// #endregion
 </script>
 
+<!-- TODO: Update table on update and delete -->
 {#await transactionsReq}
 	<div class="flex h-64 items-center justify-center">
 		<p class="text-gray-500">Loading your transactions...</p>
@@ -117,19 +130,43 @@
 									{formatAmount(transaction.amount, transaction.currency)}
 								</td>
 								<td class="p-4">{transaction.category}</td>
-								<td class="max-w-md truncate p-4" title={transaction.description || ''}>
+								<td class="truncate p-4" title={transaction.description || ''}>
 									{transaction.description || '-'}
 								</td>
 								<td class="p-4">{transaction.vendor}</td>
 								<td class="p-4 text-right">
 									<div class="flex flex-col justify-end">
 										<button class="button" onclick={() => openModal(transaction)}>Edit</button>
-										<button
-											class="button text-[--destructive] hover:text-[--destructive-hover]"
-											onclick={() => handleDelete(transaction)}
-										>
-											Delete
-										</button>
+										<div class="delete-actions">
+											{#if showDeleteConfirm === transaction.id}
+												<!-- svelte-ignore a11y_no_static_element_interactions -->
+												<div
+													class="bottom absolute right-4 rounded-md border border-[--border] bg-[--surface] p-2 shadow-lg"
+												>
+													<p class="mb-2 text-sm">Delete this transaction?</p>
+													<div class="flex justify-around gap-2">
+														<button
+															class="rounded px-2 py-1 text-xs hover:bg-[--muted-surface] transition-all duration-100 ease-in-out"
+															onclick={cancelDelete}
+														>
+															Cancel
+														</button>
+														<button
+															class="rounded bg-[--destructive] px-2 py-1 text-xs text-white hover:bg-[--destructive-hover] transition-all duration-100 ease-in-out"
+															onclick={() => handleDelete(transaction)}
+														>
+															Confirm
+														</button>
+													</div>
+												</div>
+											{/if}
+											<button
+												class="button text-[--destructive] hover:text-[--destructive-hover]"
+												onclick={() => handleDelete(transaction)}
+											>
+												Delete
+											</button>
+										</div>
 									</div>
 								</td>
 							</tr>
@@ -190,7 +227,7 @@
 							<input
 								type="datetime-local"
 								id="date"
-								value="{new Date(editedTransaction.date).toISOString().slice(0, 16)}"
+								value={new Date(editedTransaction.date).toISOString().slice(0, 16)}
 								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							/>
@@ -205,8 +242,8 @@
 								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							>
-								<option value='income'>Income</option>
-								<option value='expense'>Expense</option>
+								<option value="income">Income</option>
+								<option value="expense">Expense</option>
 							</select>
 						</div>
 
@@ -323,14 +360,14 @@
 					<div class="flex justify-end gap-3 border-t pt-4" style="border-color: var(--border);">
 						<button
 							type="button"
-							class="rounded-md px-4 py-2 text-sm font-medium transition-colors bg-[--muted-surface] border border-solid border-[--border]"
+							class="rounded-md border border-solid border-[--border] bg-[--muted-surface] px-4 py-2 text-sm font-medium transition-colors"
 							onclick={closeModal}
 						>
 							Cancel
 						</button>
 						<button
 							type="submit"
-							class="rounded-md px-4 py-2 text-sm font-semibold text-[--primary-dark-text] transition-colors bg-[--primary] hover:bg-[--primary-hover] border border-solid border-[--border]"
+							class="rounded-md border border-solid border-[--border] bg-[--primary] px-4 py-2 text-sm font-semibold text-[--primary-dark-text] transition-colors hover:bg-[--primary-hover]"
 						>
 							Save Changes
 						</button>
