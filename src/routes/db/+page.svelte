@@ -2,49 +2,16 @@
 	import { user } from '$lib/auth';
 	import { postEditTransaction, fetchTransactions, type Transaction } from './load';
 
+	// #region Variables initialization
 	const transactionsReq: Promise<Transaction[] | null> = fetchTransactions($user);
 
-	let editTransaction: Transaction;
-	let openModalEdit = false;
+	let transactions = $state<Transaction[]>([]);
+	let isModalOpen = $state(false);
+	let editedTransaction = $state<Transaction>({} as Transaction);
+	let sortField = $state('date');
+	let sortDirection = $state<'asc' | 'desc'>('desc');
 
-	// Format date
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleString();
-		// return new Date(dateString).toLocaleDateString('uk-UA', {
-		// 	year: 'numeric',
-		// 	month: 'short',
-		// 	day: 'numeric',
-		// 	hour: '2-digit',
-		// 	minute: '2-digit'
-		// });
-	};
-
-	// Format amount with currency
-	const formatAmount = (amount: string, currency: string) => {
-		return `${amount} ${currency}`;
-	};
-
-	// function handleEdit(event: Event) {
-	// 	event.preventDefault();
-	// 	const form = event.target as HTMLFormElement;
-	// 	const transaction: Transaction = {
-	// 		id: form.id.value,
-	// 		date: new Date().toISOString(),
-	// 		amount: form.amount.value,
-	// 		currency: 'USD',
-	// 		category: form.category.value,
-	// 		description: form.description.value,
-	// 		vendor: form.vendor.value,
-	// 		type: 'expense'
-	// 	};
-	// 	postEditTransaction(transaction, $user);
-	// }
-
-	function handleDelete(transaction: Transaction) {
-		console.log(transaction);
-	}
-
-    // fetch categories
+	// TODO: fetch categories
 	const categories = [
 		'Food & Dining',
 		'Shopping',
@@ -56,14 +23,20 @@
 		'Education',
 		'Other'
 	];
+	// #endregion
 
-	let transactions = $state<Transaction[]>([]);
-	let isModalOpen = $state(false);
-	let editedTransaction = $state<Transaction>({} as Transaction);
-	let sortField = $state('date');
-	let sortDirection = $state<'asc' | 'desc'>('desc');
+	// #region Transaction update/delete
+	function handleEdit(event: Event) {
+		event.preventDefault();
+		postEditTransaction(transaction, $user);
+	}
 
-	// Modal handling
+	function handleDelete(transaction: Transaction) {
+		console.log(transaction);
+	}
+	// #endregion
+
+	// #region Modal handling
 	const openModal = (transaction: Transaction) => {
 		editedTransaction = { ...transaction };
 		isModalOpen = true;
@@ -84,6 +57,17 @@
 		transactions = transactions.map((t) => (t.id === editedTransaction.id ? editedTransaction : t));
 		closeModal();
 	};
+	//  #endregion
+
+	// #region Helper functions
+	const formatDate = (dateString: string) => {
+		return new Date(dateString).toLocaleString();
+	};
+
+	const formatAmount = (amount: string, currency: string) => {
+		return `${amount} ${currency}`;
+	};
+	// #endregion
 </script>
 
 {#await transactionsReq}
@@ -91,11 +75,12 @@
 		<p class="text-gray-500">Loading your transactions...</p>
 	</div>
 {:then data}
+	<!-- #region Table -->
 	<div class="rounded-lg bg-[--surface] pt-4 shadow">
 		{#if data === null || data.length === 0}
 			<p class="px-4 text-3xl font-semibold text-gray-500">No transactions found.</p>
 		{:else}
-			<h3 class="border-b border-[--border] px-4 pb-2 text-3xl font-semibold text-[--foreground]">
+			<h3 class="border-b border-[--border] px-4 pb-2 text-3xl font-semibold text-[--primary-text]">
 				Recent Transactions
 			</h3>
 
@@ -139,7 +124,7 @@
 								<td class="p-4">{transaction.vendor}</td>
 								<td class="p-4 text-right">
 									<div class="flex flex-col justify-end">
-										<button class="button" onclick={() => {isModalOpen = true; editedTransaction = transaction}}> Edit </button>
+										<button class="button" onclick={() => openModal(transaction)}>Edit</button>
 										<button
 											class="button text-[--destructive] hover:text-[--destructive-hover]"
 											onclick={() => handleDelete(transaction)}
@@ -155,50 +140,46 @@
 			</table>
 		{/if}
 	</div>
+	<!-- #endregion -->
 
-	<!-- Edit Modal -->
-	<!-- {#if openModalEdit}
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-[--surface] rounded-lg shadow-lg p-4 w-96">
-                <h3 class="text-2xl font-semibold">Edit Transaction</h3>
-                <form onsubmit={handleEdit}>
-                    <input type="hidden" name="id" value={transaction.id} />
-                    <input type="text" placeholder="Date" />
-                    <input type="text" placeholder="Amount" />
-                    <input type="text" placeholder="Category" />
-                    <input type="text" placeholder="Description" />
-                    <input type="text" placeholder="Vendor" />
-                    <button type="submit" class="button">Save</button>
-                </form>
-            </div>
-        </div>
-    {/if} -->
-	<!-- Modal -->
+	<!-- #region Modal -->
 	{#if isModalOpen}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
+
+		<!-- shadow background -->
 		<div
-			class="fixed inset-0 z-50 flex items-center justify-center p-4"
-			style="background-color: rgba(18, 18, 18, 0.5);"
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
 			onclick={handleClickOutside}
 		>
-			<div
-				class="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-lg shadow-xl"
-				style="background-color: var(--surface);"
-			>
-				<div
-					class="flex items-center justify-between border-b p-6"
-					style="border-color: var(--border);"
-				>
-					<h2 class="text-xl font-semibold" style="color: var(--primary-text);">
-						Edit Transaction
-					</h2>
+			<!-- Modal window -->
+			<div class="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-lg bg-[--surface] shadow-xl">
+				<!-- Header -->
+				<div class="flex items-center justify-between border-b border-[--border] p-6">
+					<h2 class="text-xl font-semibold">Edit Transaction</h2>
+
+					<!-- Cross close button -->
 					<button
-						class="rounded-full p-2 transition-colors"
-						style="color: var(--primary-text); hover:background-color: var(--muted-background);"
+						type="button"
 						onclick={closeModal}
+						class="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border-0 border-solid border-[--border] bg-transparent text-sm text-[--primary-text] transition-all duration-100 ease-in-out hover:border hover:bg-[--muted-surface]"
 					>
-						x
+						<svg
+							class="h-3 w-3"
+							aria-hidden="true"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 14 14"
+						>
+							<path
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+							/>
+						</svg>
+						<span class="sr-only">Close modal</span>
 					</button>
 				</div>
 
@@ -206,138 +187,98 @@
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<!-- Date -->
 						<div class="space-y-2">
-							<label
-								for="date"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Date</label
-							>
+							<label for="date" class="block text-sm font-medium">Date</label>
 							<input
 								type="datetime-local"
 								id="date"
 								bind:value={editedTransaction.date}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							/>
 						</div>
 
 						<!-- Type -->
 						<div class="space-y-2">
-							<label
-								for="type"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Type</label
-							>
+							<label for="type" class="block text-sm font-medium">Type</label>
 							<input
 								type="text"
 								id="type"
 								bind:value={editedTransaction.type}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							/>
 						</div>
 
 						<!-- Amount -->
 						<div class="space-y-2">
-							<label
-								for="amount"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Amount</label
-							>
+							<label for="amount" class="block text-sm font-medium">Amount</label>
 							<input
 								type="number"
 								id="amount"
 								bind:value={editedTransaction.amount}
 								step="0.01"
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							/>
 						</div>
 
 						<!-- Original Amount -->
 						<div class="space-y-2">
-							<label
-								for="original_amount"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Original Amount</label
-							>
+							<label for="original_amount" class="block text-sm font-medium">Original Amount</label>
 							<input
 								type="number"
 								id="original_amount"
 								bind:value={editedTransaction.original_amount}
 								step="0.01"
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 							/>
 						</div>
 
 						<!-- Currency -->
 						<div class="space-y-2">
-							<label
-								for="currency"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Currency</label
-							>
+							<label for="currency" class="block text-sm font-medium">Currency</label>
 							<input
 								type="text"
 								id="currency"
 								bind:value={editedTransaction.currency}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							/>
 						</div>
 
 						<!-- Original Currency -->
 						<div class="space-y-2">
-							<label
-								for="original_currency"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Original Currency</label
-							>
+							<label for="original_currency" class="block text-sm font-medium">OG Currency</label>
 							<input
 								type="text"
 								id="original_currency"
 								bind:value={editedTransaction.original_currency}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 							/>
 						</div>
 
 						<!-- Card -->
 						<div class="space-y-2">
-							<label
-								for="card"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Card</label
-							>
+							<label for="card" class="block text-sm font-medium">Card</label>
 							<input
 								type="text"
 								id="card"
 								bind:value={editedTransaction.card}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							/>
 						</div>
 
 						<!-- Category -->
-                        <!-- try multiselect -->
 						<div class="space-y-2">
-							<label
-								for="category"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Category</label
-							>
+							<label for="category" class="block text-sm font-medium">Category</label>
 							<select
 								id="category"
 								bind:value={editedTransaction.category}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							>
+								<!-- TODO: multiselect -->
 								{#each categories as category}
 									<option value={category}>{category}</option>
 								{/each}
@@ -346,66 +287,49 @@
 
 						<!-- Vendor -->
 						<div class="space-y-2">
-							<label
-								for="vendor"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Vendor</label
-							>
+							<label for="vendor" class="block text-sm font-medium">Vendor</label>
 							<input
 								type="text"
 								id="vendor"
 								bind:value={editedTransaction.vendor}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 							/>
 						</div>
 
 						<!-- Transaction Source -->
 						<div class="space-y-2">
-							<label
-								for="transaction_source"
-								class="block text-sm font-medium"
-								style="color: var(--primary-text);">Source</label
-							>
+							<label for="transaction_source" class="block text-sm font-medium">Source</label>
 							<input
 								type="text"
 								id="transaction_source"
 								bind:value={editedTransaction.transaction_source}
-								class="w-full rounded-md px-3 py-2"
-								style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 							/>
 						</div>
 					</div>
 
 					<!-- Description -->
 					<div class="space-y-2">
-						<label
-							for="description"
-							class="block text-sm font-medium"
-							style="color: var(--primary-text);">Description</label
-						>
+						<label for="description" class="block text-sm font-medium">Description</label>
 						<textarea
 							id="description"
 							bind:value={editedTransaction.description}
 							rows="3"
-							class="w-full rounded-md px-3 py-2"
-							style="background-color: var(--input-background); color: var(--primary-text); border: 1px solid var(--border);"
+							class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 						></textarea>
 					</div>
 
 					<div class="flex justify-end gap-3 border-t pt-4" style="border-color: var(--border);">
 						<button
 							type="button"
-							class="rounded-md px-4 py-2 text-sm font-medium transition-colors"
-							style="background-color: var(--muted-surface); color: var(--primary-text); border: 1px solid var(--border);"
+							class="rounded-md px-4 py-2 text-sm font-medium transition-colors bg-[--muted-surface] border border-solid border-[--border]"
 							onclick={closeModal}
 						>
 							Cancel
 						</button>
 						<button
 							type="submit"
-							class="rounded-md px-4 py-2 text-sm font-medium transition-colors"
-							style="background-color: var(--primary); color: var(--primary-text); hover:background-color: var(--primary-hover);"
+							class="rounded-md px-4 py-2 text-sm font-semibold text-[--primary-dark-text] transition-colors bg-[--primary] hover:bg-[--primary-hover] border border-solid border-[--border]"
 						>
 							Save Changes
 						</button>
@@ -414,10 +338,12 @@
 			</div>
 		</div>
 	{/if}
+	<!-- #endregion -->
 
-	<!-- Debug section -->
+	<!-- #region Debug section -->
 	<div class="mt-8 rounded bg-[--surface] p-4">
 		<h3 class="font-mono text-sm">Debug Data:</h3>
 		<pre class="overflow-auto text-xs">{JSON.stringify(data, null, 2)}</pre>
 	</div>
+	<!-- #endregion -->
 {/await}
