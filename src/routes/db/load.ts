@@ -70,9 +70,9 @@ export async function postEditTransaction(transaction: Transaction, user: User |
         }
 
         console.log('response:', response);
-        console.log('response.json:', await response.json());
-        
         const data = await response.json();
+        console.log('response.json:', data);
+        
         return data;
         
     } catch (error) {

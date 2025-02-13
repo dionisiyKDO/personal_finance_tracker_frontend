@@ -6,8 +6,9 @@
 	const transactionsReq: Promise<Transaction[] | null> = fetchTransactions($user);
 
 	let transactions = $state<Transaction[]>([]);
-	let isModalOpen = $state(false);
 	let editedTransaction = $state<Transaction>({} as Transaction);
+	
+	let isModalOpen = $state(false);
 	let sortField = $state('date');
 	let sortDirection = $state<'asc' | 'desc'>('desc');
 
@@ -26,11 +27,6 @@
 	// #endregion
 
 	// #region Transaction update/delete
-	function handleEdit(event: Event) {
-		event.preventDefault();
-		postEditTransaction(transaction, $user);
-	}
-
 	function handleDelete(transaction: Transaction) {
 		console.log(transaction);
 	}
@@ -54,7 +50,10 @@
 
 	const handleSubmit = (e: Event) => {
 		e.preventDefault();
+		const form = e.target as HTMLFormElement;
+		editedTransaction.date = form.date.value;
 		transactions = transactions.map((t) => (t.id === editedTransaction.id ? editedTransaction : t));
+		postEditTransaction(editedTransaction, $user);
 		closeModal();
 	};
 	//  #endregion
@@ -191,7 +190,7 @@
 							<input
 								type="datetime-local"
 								id="date"
-								bind:value={editedTransaction.date}
+								value="{new Date(editedTransaction.date).toISOString().slice(0, 16)}"
 								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
 							/>
@@ -200,13 +199,15 @@
 						<!-- Type -->
 						<div class="space-y-2">
 							<label for="type" class="block text-sm font-medium">Type</label>
-							<input
-								type="text"
+							<select
 								id="type"
 								bind:value={editedTransaction.type}
 								class="w-full rounded-md border border-solid border-[--border] bg-[--input-background] px-3 py-2"
 								required
-							/>
+							>
+								<option value='income'>Income</option>
+								<option value='expense'>Expense</option>
+							</select>
 						</div>
 
 						<!-- Amount -->
