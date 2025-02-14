@@ -1,5 +1,37 @@
 import { type User } from '$lib/auth';
 
+export interface Categories {
+    categories: string[]
+}
+
+export async function fetchCategories(user: User | null): Promise<Categories | null> {
+    try {
+        if (!user) { return null; } 
+        
+        const isStandalone = window.location.port !== '8000';
+        const apiBase = isStandalone ? 'http://localhost:8000' : '';
+        
+        const response = await fetch(`${apiBase}/api/transactions/categories/`, {
+            method: 'GET',
+            headers: { Authorization: `Token ${user.token}`, 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            const error = data.error || "Failed to fetch categories";
+            console.log(error);
+            return null;
+        }
+
+        const data = await response.json() as Categories;
+        return data;
+        
+    } catch (error) {
+        console.error('Error during login:', error);
+        return null;
+    }
+}
+
 export interface Transaction {
     id: number | null
     date: string

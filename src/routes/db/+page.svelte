@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { user } from '$lib/auth';
-	import { postEditTransaction, postDeleteTransaction, fetchTransactions, type Transaction } from './load';
+	import { postEditTransaction, postDeleteTransaction, fetchTransactions, fetchCategories, type Transaction, type Categories } from './load';
 
 	// #region Variables initialization
 	const transactionsReq: Promise<Transaction[] | null> = fetchTransactions($user);
@@ -13,18 +13,10 @@
 	let sortField = $state('date');
 	let sortDirection = $state<'asc' | 'desc'>('desc');
 
-	// TODO: fetch categories
-	const categories = [
-		'Food & Dining',
-		'Shopping',
-		'Transportation',
-		'Bills & Utilities',
-		'Entertainment',
-		'Travel',
-		'Healthcare',
-		'Education',
-		'Other'
-	];
+	let categories = $state<string[] | undefined>([]);
+	fetchCategories($user).then((data) => {
+		categories = data?.categories;
+	});
 	// #endregion
 
 	// #region Modal handling
