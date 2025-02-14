@@ -59,7 +59,10 @@
 		return new Date(dateString).toLocaleString();
 	};
 
-	const formatAmount = (amount: string, currency: string) => {
+	const formatAmount = (amount: string, currency: string, type: string) => {
+		if (type === 'expense') {
+			return `-${amount} ${currency}`;
+		}
 		return `${amount} ${currency}`;
 	};
 	// #endregion
@@ -117,17 +120,17 @@
 						<th class="h-12 w-28 px-4 text-center align-middle font-medium">Actions</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody class="divide-y divide-[--border] divide-solid">
 					{#each data as transaction, index}
 						{#if index < 5}
-							<tr class="border-b border-[--border] transition-colors hover:bg-[--muted-surface]">
+							<tr class="transition-colors hover:bg-[--muted-surface]">
 								<td class="p-4 text-center">{formatDate(transaction.date)}</td>
 								<td
-									class="p-4 text-right"
+									class="p-4 text-right font-semibold"
 									class:text-red-500={transaction.type == 'expense'}
 									class:text-green-500={transaction.type == 'income'}
 								>
-									{formatAmount(transaction.amount, transaction.currency)}
+									{formatAmount(transaction.amount, transaction.currency, transaction.type)}
 								</td>
 								<td class="p-4">{transaction.category}</td>
 								<td class="truncate p-4" title={transaction.description || ''}>
@@ -135,7 +138,7 @@
 								</td>
 								<td class="p-4">{transaction.vendor}</td>
 								<td class="p-4 text-right">
-									<div class="flex flex-col justify-end">
+									<div class="flex flex-col items-center">
 										<button class="button" onclick={() => openModal(transaction)}>Edit</button>
 										<div class="delete-actions">
 											{#if showDeleteConfirm === transaction.id}
