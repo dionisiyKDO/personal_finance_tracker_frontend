@@ -1,38 +1,41 @@
-# sv
+# FinanceTracker Frontend  
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Web interface for managing personal finances and tracking transactions.  
 
-## Creating a project
+Built with:  
+- **Svelte 5**: For a reactive and efficient UI.  
+- **Tailwind CSS**: For modern styling and responsive design.  
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features  
 
+- Landing page with general transaction statistics  
+- Web interface for CRUD operations on stored transactions  
+- Responsive design with Tailwind CSS  
+
+## Setup  
+
+1. Clone this repository:  
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+git clone https://github.com/dionisiyKDO/personal_finance_tracker_frontend
 ```
 
-## Developing
+2. Install dependencies:
+```bash
+npm install
+```
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
+3. Run development server:
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
-
-To create a production version of your app:
-
+4. Build for production:
 ```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+## Requirements
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- Node.js 16+
+- Running instance of [Personal finance tracker backend](https://github.com/dionisiyKDO/personal_finance_tracker_backend).
+- Imported transactions history on backend side.
